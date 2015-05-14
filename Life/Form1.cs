@@ -28,7 +28,7 @@ namespace Life
                 for (int j = 0; j < height; j++)
                 {
                     cc = rnd.Next(101);
-                    if (cc > fillFactor)
+                    if (cc < fillFactor)
                     {
                         result[i,j]=true;
                     }
@@ -81,6 +81,16 @@ namespace Life
         public static class Glob
         {
             public static bool[,] field;
+        }
+
+        public class cUniverse
+        {
+            public bool[,] field;
+
+            public cUniverse(int width, int height)
+            {
+
+            }
         }
 
 
