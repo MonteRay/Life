@@ -18,61 +18,6 @@ namespace Life
             InitializeComponent();
         }
 
-        public bool[,] genField(int width, int height, int fillFactor)
-        {
-            int cc;
-            Random rnd = new Random();
-            bool[,] result = new bool[width, height];
-            for (int i = 0; i < width; i++)
-            {
-                for (int j = 0; j < height; j++)
-                {
-                    cc = rnd.Next(101);
-                    if (cc < fillFactor)
-                    {
-                        result[i,j]=true;
-                    }
-                    else
-                    {
-                        result[i,j]=false;
-                    }
-
-
-                }
-            }
-            return result;
-        }
-
-        public Bitmap drawField(bool[,] field, int scaleFactor)
-        {
-            int width = field.GetLength(0);
-            int height = field.GetLength(1);
-            Bitmap result = new Bitmap(width*scaleFactor, height*scaleFactor);
-            System.Drawing.Color color;
-            for (int x = 0; x < width; x++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    if (field[x,y])
-                    {
-                        color = System.Drawing.Color.Black;
-                    }
-                    else
-                    {
-                        color = System.Drawing.Color.White;
-                    }
-
-                    for (int dx = 0; dx < scaleFactor; dx++)
-                        for (int dy = 0; dy < scaleFactor; dy++)
-                        {
-                            result.SetPixel(x*scaleFactor+dx, y*scaleFactor+dy, color);
-                        }
-                        
-
-                }
-            }
-            return result;
-        }
         //public class tField:
         //   public bool genField()
         // {
@@ -81,28 +26,90 @@ namespace Life
         public static class Glob
         {
             public static bool[,] field;
+            public static cUniverse universe;
+
         }
 
         public class cUniverse
         {
             public bool[,] field;
 
-            public cUniverse(int width, int height)
+            public cUniverse()
             {
 
             }
+
+            public void genField(int width, int height, int fillFactor)
+            {
+                int cc;
+                Random rnd = new Random();
+                bool[,] result = new bool[width, height];
+                for (int i = 0; i < width; i++)
+                {
+                    for (int j = 0; j < height; j++)
+                    {
+                        cc = rnd.Next(101);
+                        if (cc < fillFactor)
+                        {
+                            result[i, j] = true;
+                        }
+                        else
+                        {
+                            result[i, j] = false;
+                        }
+
+
+                    }
+                }
+                this.field = result;
+            }
+            
+            public Bitmap drawField(int scaleFactor)
+            {
+                int width = this.field.GetLength(0);
+                int height = this.field.GetLength(1);
+                Bitmap result = new Bitmap(width * scaleFactor, height * scaleFactor);
+                System.Drawing.Color color;
+                for (int x = 0; x < width; x++)
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        if (this.field[x, y])
+                        {
+                            color = System.Drawing.Color.Black;
+                        }
+                        else
+                        {
+                            color = System.Drawing.Color.White;
+                        }
+
+                        for (int dx = 0; dx < scaleFactor; dx++)
+                            for (int dy = 0; dy < scaleFactor; dy++)
+                            {
+                                result.SetPixel(x * scaleFactor + dx, y * scaleFactor + dy, color);
+                            }
+
+
+                    }
+                }
+                return result;
+            }
+
+            //public 
+
         }
 
 
         private void BtnGen_Click(object sender, EventArgs e)
         {
-            
 
+            Glob.universe = new cUniverse();
 
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            if (Glob.universe == null) return;
 
             int width = pictureBox1.Width;
             int height = pictureBox1.Height;
@@ -112,10 +119,11 @@ namespace Life
 
             int scaledWidth = width/scaleFactor;
             int scaledHeight = height/scaleFactor;
-            
-            Glob.field = genField(scaledWidth, scaledHeight, fillFactor);
 
-            pictureBox1.Image = drawField(Glob.field,scaleFactor);
+            
+            Glob.universe.genField(scaledWidth, scaledHeight, fillFactor);
+
+            pictureBox1.Image = Glob.universe.drawField(scaleFactor);
 
         }
 
@@ -131,10 +139,7 @@ namespace Life
         public int age { get; set; }
     }
 
-    public class universe
-    {
-
-    }
+    
 
     
 
