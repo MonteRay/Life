@@ -32,7 +32,21 @@ namespace Life
 
         public class cUniverse
         {
-            public bool[,] field;
+            public class cNode
+            {
+                //public int id { get; set; }
+                public int age { get; set; }
+                public int gender;
+            }
+
+            public class sector
+            {
+                public int nodeId;
+            }
+
+            public sector[,] field;
+
+            public Dictionary<int,cNode> nodes;
 
             public cUniverse()
             {
@@ -43,7 +57,8 @@ namespace Life
             {
                 int cc;
                 Random rnd = new Random();
-                bool[,] result = new bool[width, height];
+                this.nodes.Clear();
+                this.field = new sector[width, height];
                 for (int i = 0; i < width; i++)
                 {
                     for (int j = 0; j < height; j++)
@@ -51,6 +66,7 @@ namespace Life
                         cc = rnd.Next(101);
                         if (cc < fillFactor)
                         {
+                            this.nodes.Add() !!!!!!!!!!!!!
                             result[i, j] = true;
                         }
                         else
@@ -95,7 +111,7 @@ namespace Life
                 return result;
             }
 
-            //public 
+
 
         }
 
@@ -133,11 +149,7 @@ namespace Life
         }
     }
 
-    public class node
-    {
-        public int id { get; set; }
-        public int age { get; set; }
-    }
+    
 
     
 
