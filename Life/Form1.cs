@@ -126,18 +126,21 @@ namespace Life
                     for (int y = 0; y < height; y++)
                     {
                         neighborCount = countNeighbors(x, y);
-                        if (oldField[x, y].nodeId > 0) if (neighborCount != 2 && neighborCount != 3)
+                        if (oldField[x, y].nodeId > 0)
+                        {
+                            if (neighborCount != 2 && neighborCount != 3)
                             {
                                 //die
                                 nodes.Remove(field[x, y].nodeId);
                                 field[x, y].nodeId = 0;
                             }
-                            else if (neighborCount == 3)
-                            {
-                                //born
-                                this.nodes.Add(++lastNodeId, new cNode());
-                                this.field[x, y].nodeId = lastNodeId;
-                            }
+                        }
+                        else if (neighborCount == 3)
+                        {
+                            //born
+                            nodes.Add(++lastNodeId, new cNode());
+                            field[x, y].nodeId = lastNodeId;
+                        }
                     }
                 }
             }
@@ -154,7 +157,7 @@ namespace Life
                         if (sx == cx && sy == cy) continue;
                         if (cx < 0) { x = field.GetLength(0) + cx; } else if (cx > field.GetLength(0) - 1) { x = cx - field.GetLength(0); } else { x = cx; }
                         if (cy < 0) { y = field.GetLength(1) + cy; } else if (cy > field.GetLength(1) - 1) { y = cy - field.GetLength(1); } else { y = cy; }
-                        if (field[x, y].nodeId > 0) result++; 
+                        if (oldField[x, y].nodeId > 0) result++; 
                         /*
                         if ($cx -lt 0) {$x=$field.width+$cx} elseif ($cx -gt $field.width-1) {$x=$cx-$field.width} else {$x=$cx}
                         if ($cy -lt 0) {$y=$field.height+$cy} elseif ($cy -gt $field.height-1) {$y=$cy-$field.height} else {$y=$cy}
@@ -184,6 +187,7 @@ namespace Life
 
             Glob.universe = new cUniverse();
             Glob.universe.genField(scaledWidth, scaledHeight, fillFactor);
+            pictureBox1.Image = Glob.universe.drawField(scaleFactor);
 
         }
 
@@ -229,6 +233,8 @@ namespace Life
 
 
             //Glob.universe.genField(scaledWidth, scaledHeight, fillFactor);
+
+            Glob.universe.nextGeneration();
 
             pictureBox1.Image = Glob.universe.drawField(scaleFactor);
         }
