@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Life
@@ -50,20 +45,31 @@ namespace Life
 
             public class Field
             {
-                private sector[,] sectors;
+                private readonly sector[,] sectors;
 
                 public Field(int x, int y)
                 {
                     sectors = new sector[x,y];
                 }
 
+                protected Field(sector[,] sectors)
+                {
+                    this.sectors = sectors.Clone() as sector[,];
+                }
+
                 public sector this[int x, int y]
                 {
                     get { return sectors[x, y]; }
+                    set { sectors[x, y] = value; }
                 }
 
-                public int width { get { return sectors.GetLength(0); } }
-                public int height { get { return sectors.GetLength(1); } }
+                public int width => sectors.GetLength(0);
+                public int height => sectors.GetLength(1);
+
+                public Field Clone()
+                {
+                    return new Field(this.sectors);
+                }
             }
 
             //public sector[,] field, oldField;
@@ -92,7 +98,7 @@ namespace Life
                         if (cc < fillFactor)
                         {
                             nodes.Add(++lastNodeId,new cNode());
-                            field[x, y].nodeId;
+                            field[x, y] = new sector {nodeId = lastNodeId};
                             //result[x, y] = true;
                         }
                         else
@@ -111,18 +117,18 @@ namespace Life
                 int width = field.width;
                 int height = field.height;
                 Bitmap result = new Bitmap(width * scaleFactor, height * scaleFactor);
-                System.Drawing.Color color;
+                Color color;
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = 0; y < height; y++)
                     {
                         if (field[x, y].nodeId!=0)
                         {
-                            color = System.Drawing.Color.Black;
+                            color = Color.Black;
                         }
                         else
                         {
-                            color = System.Drawing.Color.White;
+                            color = Color.White;
                         }
 
                         for (int dx = 0; dx < scaleFactor; dx++)
@@ -173,7 +179,7 @@ namespace Life
 
             public void nextGeneration()
             {
-                oldField = (Field) field.Clone();
+                oldField = field.Clone();
                 int neighborCount;
                 int width = field.width;
                 int height = field.height;
@@ -188,14 +194,14 @@ namespace Life
                             {
                                 //die
                                 nodes.Remove(field[x, y].nodeId);
-                                field[x, y].nodeId = 0;
+                                field[x, y] = new sector { nodeId = 0 };
                             }
                         }
                         else if (neighborCount == 3)
                         {
                             //born
                             nodes.Add(++lastNodeId, new cNode());
-                            field[x, y].nodeId = lastNodeId;
+                            field[x, y]= new sector { nodeId = lastNodeId };
                         }
                     }
                 }
@@ -203,7 +209,7 @@ namespace Life
 
             public int countNeighbors(int sx, int sy) 
             {
-                if (sx >= field.GetLength(0) || sy >= field.GetLength(1)) return -1;
+                if (sx >= field.width || sy >= field.height) return -1;
                 int result = 0;
                 int cx,cy,x,y;
                 for (cx = sx - 1; cx <= sx + 1; cx++)
@@ -211,8 +217,8 @@ namespace Life
                     for (cy = sy-1; cy <= sy+1; cy++)
                     {
                         if (sx == cx && sy == cy) continue;
-                        if (cx < 0) { x = field.GetLength(0) + cx; } else if (cx > field.GetLength(0) - 1) { x = cx - field.GetLength(0); } else { x = cx; }
-                        if (cy < 0) { y = field.GetLength(1) + cy; } else if (cy > field.GetLength(1) - 1) { y = cy - field.GetLength(1); } else { y = cy; }
+                        if (cx < 0) { x = field.width + cx; } else if (cx > field.width - 1) { x = cx - field.width; } else { x = cx; }
+                        if (cy < 0) { y = field.height + cy; } else if (cy > field.height - 1) { y = cy - field.height; } else { y = cy; }
                         if (oldField[x, y].nodeId > 0) result++; 
                         /*
                         if ($cx -lt 0) {$x=$field.width+$cx} elseif ($cx -gt $field.width-1) {$x=$cx-$field.width} else {$x=$cx}
