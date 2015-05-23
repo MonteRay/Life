@@ -30,21 +30,21 @@
         {
             this.components = new System.ComponentModel.Container();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
+            this.nudFillFactor = new System.Windows.Forms.NumericUpDown();
             this.nudScale = new System.Windows.Forms.NumericUpDown();
             this.startStopBtn = new System.Windows.Forms.Button();
             this.BtnGen = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.tmr = new System.Windows.Forms.Timer(this.components);
             this.panel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudFillFactor)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudScale)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.numericUpDown2);
+            this.panel1.Controls.Add(this.nudFillFactor);
             this.panel1.Controls.Add(this.nudScale);
             this.panel1.Controls.Add(this.startStopBtn);
             this.panel1.Controls.Add(this.BtnGen);
@@ -54,24 +54,19 @@
             this.panel1.Size = new System.Drawing.Size(101, 230);
             this.panel1.TabIndex = 3;
             // 
-            // numericUpDown2
+            // nudFillFactor
             // 
-            this.numericUpDown2.Location = new System.Drawing.Point(12, 96);
-            this.numericUpDown2.Maximum = new decimal(new int[] {
-            25,
+            this.nudFillFactor.Increment = new decimal(new int[] {
+            5,
             0,
             0,
             0});
-            this.numericUpDown2.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numericUpDown2.Name = "numericUpDown2";
-            this.numericUpDown2.Size = new System.Drawing.Size(75, 20);
-            this.numericUpDown2.TabIndex = 6;
-            this.numericUpDown2.Value = new decimal(new int[] {
-            1,
+            this.nudFillFactor.Location = new System.Drawing.Point(12, 96);
+            this.nudFillFactor.Name = "nudFillFactor";
+            this.nudFillFactor.Size = new System.Drawing.Size(75, 20);
+            this.nudFillFactor.TabIndex = 6;
+            this.nudFillFactor.Value = new decimal(new int[] {
+            30,
             0,
             0,
             0});
@@ -93,7 +88,7 @@
             this.nudScale.Size = new System.Drawing.Size(75, 20);
             this.nudScale.TabIndex = 5;
             this.nudScale.Value = new decimal(new int[] {
-            1,
+            25,
             0,
             0,
             0});
@@ -145,7 +140,7 @@
             this.Name = "Form1";
             this.Text = "Form1";
             this.panel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudFillFactor)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudScale)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
@@ -160,7 +155,7 @@
         private System.Windows.Forms.Button BtnGen;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Timer tmr;
-        private System.Windows.Forms.NumericUpDown numericUpDown2;
+        private System.Windows.Forms.NumericUpDown nudFillFactor;
 
     }
 }

@@ -122,7 +122,6 @@ namespace Life
 
                     }
                 }
-                ;
             }
             
             public Bitmap olddrawField(int scaleFactor)
@@ -253,7 +252,7 @@ namespace Life
 
             int width = pictureBox1.Width;
             int height = pictureBox1.Height;
-            int fillFactor = 30;
+            int fillFactor = decimal.ToInt32(nudFillFactor.Value);
 
             int scaleFactor = decimal.ToInt32(nudScale.Value);
 
