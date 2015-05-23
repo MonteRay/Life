@@ -47,9 +47,27 @@ namespace Life
                 public int nodeId;
             }
 
-            public sector[,] field, oldField;
 
+            public class Field
+            {
+                private sector[,] sectors;
 
+                public Field(int x, int y)
+                {
+                    sectors = new sector[x,y];
+                }
+
+                public sector this[int x, int y]
+                {
+                    get { return sectors[x, y]; }
+                }
+
+                public int width { get { return sectors.GetLength(0); } }
+                public int height { get { return sectors.GetLength(1); } }
+            }
+
+            //public sector[,] field, oldField;
+            public Field field, oldField;
 
             public Dictionary<int,cNode> nodes;
 
@@ -57,6 +75,7 @@ namespace Life
             {
                 lastNodeId = 0;
                 nodes = new Dictionary<int, cNode>();
+
              }
 
             public void genField(int width, int height, int fillFactor)
@@ -64,7 +83,7 @@ namespace Life
                 int cc;
                 Random rnd = new Random();
                 nodes.Clear();
-                field = new sector[width, height];
+                field = new Field(width,height);
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = 0; y < height; y++)
@@ -73,7 +92,7 @@ namespace Life
                         if (cc < fillFactor)
                         {
                             nodes.Add(++lastNodeId,new cNode());
-                            field[x,y].nodeId=lastNodeId;
+                            field[x, y].nodeId;
                             //result[x, y] = true;
                         }
                         else
@@ -89,8 +108,8 @@ namespace Life
             
             public Bitmap olddrawField(int scaleFactor)
             {
-                int width = field.GetLength(0);
-                int height = field.GetLength(1);
+                int width = field.width;
+                int height = field.height;
                 Bitmap result = new Bitmap(width * scaleFactor, height * scaleFactor);
                 System.Drawing.Color color;
                 for (int x = 0; x < width; x++)
@@ -120,8 +139,8 @@ namespace Life
 
             public void drawField(Graphics gr, int outWidth, int outHeight)
             {
-                int width = field.GetLength(0);
-                int height = field.GetLength(1);
+                int width = field.width;
+                int height = field.height;
                 Bitmap result = new Bitmap(width, height);
                 Color color;
                 for (int x = 0; x < width; x++)
@@ -154,10 +173,10 @@ namespace Life
 
             public void nextGeneration()
             {
-                oldField = (sector[,]) field.Clone();
+                oldField = (Field) field.Clone();
                 int neighborCount;
-                int width = field.GetLength(0);
-                int height = field.GetLength(1);
+                int width = field.width;
+                int height = field.height;
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = 0; y < height; y++)
