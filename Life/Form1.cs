@@ -22,15 +22,15 @@ namespace Life
         public static class Glob
         {
             public static bool[,] field;
-            public static cUniverse universe;
+            public static Universe universe;
 
         }
 
-        public class cUniverse
+        public class Universe
         {
             public int lastNodeId;
             
-            public class cNode
+            public class Node
             {
                 //public int id { get; set; }
                 public int age { get; set; }
@@ -48,50 +48,67 @@ namespace Life
 
             public class Field
             {
-                private sector[,] sectors;
+                private sector[,,] sectors;
+                private int currentLayer;
+
+                public void swap()
+                {
+                    currentLayer = currentLayer > 0 ? 0 : 1;
+                }
 
                 public Field(int width, int height)
                 {
-                    sectors = new sector[width,height];
+                    sectors=new sector[2,width,height];
                     for (int x = 0; x < width; x++)
                     {
                         for (int y = 0; y < height; y++)
                         {
-                            sectors[x,y]=new sector();
+                            sectors[0, x, y] = new sector();
+                            sectors[1, x, y] = new sector();
                         }
                     }
+                    currentLayer = 0;
                 }
-
+                /*
                 protected Field(sector[,] sectors)
                 {
                     this.sectors = sectors.Clone() as sector[,];
                 }
+                 * */
 
-                public sector this[int x, int y]
+                public sector this[int cx, int cy]
                 {
-                    get { return sectors[x, y]; }
+                    get
+                    {
+                        int x, y;
+                        if (cx < 0) { x = width + cx % width; } else if (cx > width - 1) { x = cx % width; } else { x = cx; }
+                        if (cy < 0) { y = height + cy % height; } else if (cy > height - 1) { y = cy % height; } else { y = cy; }
+                        return sectors[currentLayer, x, y];
+                    }
                     //set { sectors[x, y] = value; }
                 }
 
-                public int width { get { return sectors.GetLength(0); } }
+                public int width { get { return sectors.GetLength(1); } }
 
-                public int height {get { return sectors.GetLength(1); } }
+                public int height {get { return sectors.GetLength(2); } }
 
+                /*
                 public Field Clone()
                 {
                     return new Field(this.sectors);
                 }
+                */
             }
 
             //public sector[,] field, oldField;
-            public Field field, oldField;
+            public Field field; //oldField;
 
-            public Dictionary<int,cNode> nodes;
+            public Dictionary<int,Node> nodes;
 
-            public cUniverse()
+            public Universe()
             {
                 lastNodeId = -1;
-                nodes = new Dictionary<int, cNode>();
+                nodes = new Dictionary<int, Node>();
 
              }
 
@@ -108,7 +125,7 @@ namespace Life
                         cc = rnd.Next(101);
                         if (cc < fillFactor)
                         {
-                            nodes.Add(++lastNodeId,new cNode());
+                            nodes.Add(++lastNodeId,new Node());
                             field[x, y].nodeId=lastNodeId;
                             //result[x, y] = true;
                         }
@@ -122,6 +139,7 @@ namespace Life
                 }
             }
             
+            /*
             public Bitmap olddrawField(int scaleFactor)
             {
                 int width = field.width;
@@ -152,6 +170,7 @@ namespace Life
                 }
                 return result;
             }
+            */
 
             public void drawField(Graphics gr, int outWidth, int outHeight)
             {
@@ -189,31 +208,40 @@ namespace Life
 
             public void nextGeneration()
             {
-                oldField = field.Clone();
                 int neighborCount;
                 int width = field.width;
                 int height = field.height;
+
+                field.swap();
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = 0; y < height; y++)
                     {
+                        field.swap();
                         neighborCount = countNeighbors(x, y);
-                        if (oldField[x, y].nodeId.HasValue)
+                        var nodeId = field[x, y].nodeId;
+                        field.swap();
+                        if (nodeId.HasValue)
                         {
                             if (neighborCount != 2 && neighborCount != 3)
                             {
                                 //die
-                                var nodeId = field[x, y].nodeId;
-                                if (nodeId != null) nodes.Remove(nodeId.Value);
-                                field[x, y].nodeId=null;
+                                nodes.Remove(nodeId.Value);
+                                field[x, y].nodeId = null;
                             }
+                            else
+                            {
+                                field[x, y].nodeId = nodeId;
+                            }
+
                         }
                         else if (neighborCount == 3)
                         {
                             //born
-                            nodes.Add(++lastNodeId, new cNode());
+                            nodes.Add(++lastNodeId, new Node());
                             field[x, y].nodeId=lastNodeId;
                         }
+
                     }
                 }
             }
@@ -222,20 +250,14 @@ namespace Life
             {
                 if (sx >= field.width || sy >= field.height) return -1;
                 int result = 0;
-                int cx,cy,x,y;
-                for (cx = sx - 1; cx <= sx + 1; cx++)
+                int x,y;
+                for (x = sx - 1; x <= sx + 1; x++)
                 {
-                    for (cy = sy-1; cy <= sy+1; cy++)
+                    for (y = sy-1; y <= sy+1; y++)
                     {
-                        if (sx == cx && sy == cy) continue;
-                        if (cx < 0) { x = field.width + cx; } else if (cx > field.width - 1) { x = cx - field.width; } else { x = cx; }
-                        if (cy < 0) { y = field.height + cy; } else if (cy > field.height - 1) { y = cy - field.height; } else { y = cy; }
-                        if (oldField[x, y].nodeId.HasValue) result++; 
-                        /*
-                        if ($cx -lt 0) {$x=$field.width+$cx} elseif ($cx -gt $field.width-1) {$x=$cx-$field.width} else {$x=$cx}
-                        if ($cy -lt 0) {$y=$field.height+$cy} elseif ($cy -gt $field.height-1) {$y=$cy-$field.height} else {$y=$cy}
-                        if ($field[$x,$y]) {$NeighborCount++}
-                        */
+                        if (sx == x && sy == y) continue;
+                        
+                        if (field[x, y].nodeId.HasValue) result++; 
                     }
                 }
                 return result;
@@ -258,7 +280,7 @@ namespace Life
             int scaledWidth = width / scaleFactor;
             int scaledHeight = height / scaleFactor;
 
-            Glob.universe = new cUniverse();
+            Glob.universe = new Universe();
             Glob.universe.genField(scaledWidth, scaledHeight, fillFactor);
             
             //pictureBox1.Image.
