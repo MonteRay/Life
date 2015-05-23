@@ -131,6 +131,7 @@
             // 
             // tmr
             // 
+            this.tmr.Interval = 1000;
             this.tmr.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // Form1

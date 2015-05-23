@@ -37,19 +37,31 @@ namespace Life
                 public int gender;
             }
 
-            public struct sector
+            public class sector
             {
                 public int nodeId;
+
+                public sector()
+                {
+                    nodeId = -1;
+                }
             }
 
 
             public class Field
             {
-                private readonly sector[,] sectors;
+                private sector[,] sectors;
 
-                public Field(int x, int y)
+                public Field(int width, int height)
                 {
-                    sectors = new sector[x,y];
+                    sectors = new sector[width,height];
+                    for (int x = 0; x < width; x++)
+                    {
+                        for (int y = 0; y < height; y++)
+                        {
+                            sectors[x,y]=new sector();
+                        }
+                    }
                 }
 
                 protected Field(sector[,] sectors)
@@ -60,11 +72,12 @@ namespace Life
                 public sector this[int x, int y]
                 {
                     get { return sectors[x, y]; }
-                    set { sectors[x, y] = value; }
+                    //set { sectors[x, y] = value; }
                 }
 
-                public int width => sectors.GetLength(0);
-                public int height => sectors.GetLength(1);
+                public int width { get { return sectors.GetLength(0); } }
+
+                public int height {get { return sectors.GetLength(1); } }
 
                 public Field Clone()
                 {
@@ -79,7 +92,7 @@ namespace Life
 
             public cUniverse()
             {
-                lastNodeId = 0;
+                lastNodeId = -1;
                 nodes = new Dictionary<int, cNode>();
 
              }
@@ -98,7 +111,7 @@ namespace Life
                         if (cc < fillFactor)
                         {
                             nodes.Add(++lastNodeId,new cNode());
-                            field[x, y] = new sector {nodeId = lastNodeId};
+                            field[x, y].nodeId=lastNodeId;
                             //result[x, y] = true;
                         }
                         else
@@ -122,7 +135,7 @@ namespace Life
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        if (field[x, y].nodeId!=0)
+                        if (field[x, y].nodeId>=0)
                         {
                             color = Color.Black;
                         }
@@ -153,7 +166,7 @@ namespace Life
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        if (field[x, y].nodeId != 0)
+                        if (field[x, y].nodeId >= 0)
                         {
                             color = Color.Black;
                             result.SetPixel(x, y, color);
@@ -188,20 +201,20 @@ namespace Life
                     for (int y = 0; y < height; y++)
                     {
                         neighborCount = countNeighbors(x, y);
-                        if (oldField[x, y].nodeId > 0)
+                        if (oldField[x, y].nodeId >= 0)
                         {
                             if (neighborCount != 2 && neighborCount != 3)
                             {
                                 //die
                                 nodes.Remove(field[x, y].nodeId);
-                                field[x, y] = new sector { nodeId = 0 };
+                                field[x, y].nodeId=-1;
                             }
                         }
                         else if (neighborCount == 3)
                         {
                             //born
                             nodes.Add(++lastNodeId, new cNode());
-                            field[x, y]= new sector { nodeId = lastNodeId };
+                            field[x, y].nodeId=lastNodeId;
                         }
                     }
                 }
@@ -219,7 +232,7 @@ namespace Life
                         if (sx == cx && sy == cy) continue;
                         if (cx < 0) { x = field.width + cx; } else if (cx > field.width - 1) { x = cx - field.width; } else { x = cx; }
                         if (cy < 0) { y = field.height + cy; } else if (cy > field.height - 1) { y = cy - field.height; } else { y = cy; }
-                        if (oldField[x, y].nodeId > 0) result++; 
+                        if (oldField[x, y].nodeId >= 0) result++; 
                         /*
                         if ($cx -lt 0) {$x=$field.width+$cx} elseif ($cx -gt $field.width-1) {$x=$cx-$field.width} else {$x=$cx}
                         if ($cy -lt 0) {$y=$field.height+$cy} elseif ($cy -gt $field.height-1) {$y=$cy-$field.height} else {$y=$cy}
@@ -269,29 +282,6 @@ namespace Life
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (Glob.universe == null) return;
-
-            int width = pictureBox1.Width;
-            int height = pictureBox1.Height;
-            int fillFactor = 30;
-
-             
-            int scaleFactor = decimal.ToInt32(nudScale.Value);
-            //int scaleFactor = Math.Min(width / Glob.universe.field.GetLength(0), height / Glob.universe.field.GetLength(1));
-
-            int scaledWidth = width/scaleFactor;
-            int scaledHeight = height/scaleFactor;
-
-            
-            Glob.universe.genField(scaledWidth, scaledHeight, fillFactor);
-
-            pictureBox1.Image = Glob.universe.olddrawField(scaleFactor);
-
-        }
-
-        private void startStopBtn_Click(object sender, EventArgs e)
-        {
-            //tmr.Enabled = !tmr.Enabled;
 
             if (Glob.universe == null) return;
 
@@ -314,6 +304,35 @@ namespace Life
 
             Graphics gr = pictureBox1.CreateGraphics();
             Glob.universe.drawField(gr, width, height);
+
+
+            /*
+            if (Glob.universe == null) return;
+
+            int width = pictureBox1.Width;
+            int height = pictureBox1.Height;
+            int fillFactor = 30;
+
+             
+            int scaleFactor = decimal.ToInt32(nudScale.Value);
+            //int scaleFactor = Math.Min(width / Glob.universe.field.GetLength(0), height / Glob.universe.field.GetLength(1));
+
+            int scaledWidth = width/scaleFactor;
+            int scaledHeight = height/scaleFactor;
+
+            
+            Glob.universe.genField(scaledWidth, scaledHeight, fillFactor);
+
+            pictureBox1.Image = Glob.universe.olddrawField(scaleFactor);
+            */
+
+        }
+
+        private void startStopBtn_Click(object sender, EventArgs e)
+        {
+            tmr.Enabled = !tmr.Enabled;
+
+            
         }
     }
 
