@@ -39,12 +39,10 @@ namespace Life
 
             public class sector
             {
-                public int nodeId;
+                public int? nodeId;
 
                 public sector()
-                {
-                    nodeId = -1;
-                }
+                { }
             }
 
 
@@ -134,7 +132,7 @@ namespace Life
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        if (field[x, y].nodeId>=0)
+                        if (field[x, y].nodeId.HasValue)
                         {
                             color = Color.Black;
                         }
@@ -165,7 +163,7 @@ namespace Life
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        if (field[x, y].nodeId >= 0)
+                        if (field[x, y].nodeId.HasValue)
                         {
                             color = Color.Black;
                             result.SetPixel(x, y, color);
@@ -200,13 +198,14 @@ namespace Life
                     for (int y = 0; y < height; y++)
                     {
                         neighborCount = countNeighbors(x, y);
-                        if (oldField[x, y].nodeId >= 0)
+                        if (oldField[x, y].nodeId.HasValue)
                         {
                             if (neighborCount != 2 && neighborCount != 3)
                             {
                                 //die
-                                nodes.Remove(field[x, y].nodeId);
-                                field[x, y].nodeId=-1;
+                                var nodeId = field[x, y].nodeId;
+                                if (nodeId != null) nodes.Remove(nodeId.Value);
+                                field[x, y].nodeId=null;
                             }
                         }
                         else if (neighborCount == 3)
@@ -231,7 +230,7 @@ namespace Life
                         if (sx == cx && sy == cy) continue;
                         if (cx < 0) { x = field.width + cx; } else if (cx > field.width - 1) { x = cx - field.width; } else { x = cx; }
                         if (cy < 0) { y = field.height + cy; } else if (cy > field.height - 1) { y = cy - field.height; } else { y = cy; }
-                        if (oldField[x, y].nodeId >= 0) result++; 
+                        if (oldField[x, y].nodeId.HasValue) result++; 
                         /*
                         if ($cx -lt 0) {$x=$field.width+$cx} elseif ($cx -gt $field.width-1) {$x=$cx-$field.width} else {$x=$cx}
                         if ($cy -lt 0) {$y=$field.height+$cy} elseif ($cy -gt $field.height-1) {$y=$cy-$field.height} else {$y=$cy}
