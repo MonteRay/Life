@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,6 +49,8 @@ namespace Life
 
             public sector[,] field, oldField;
 
+
+
             public Dictionary<int,cNode> nodes;
 
             public cUniverse()
@@ -60,8 +63,8 @@ namespace Life
             {
                 int cc;
                 Random rnd = new Random();
-                this.nodes.Clear();
-                this.field = new sector[width, height];
+                nodes.Clear();
+                field = new sector[width, height];
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = 0; y < height; y++)
@@ -69,8 +72,8 @@ namespace Life
                         cc = rnd.Next(101);
                         if (cc < fillFactor)
                         {
-                            this.nodes.Add(++lastNodeId,new cNode());
-                            this.field[x,y].nodeId=lastNodeId;
+                            nodes.Add(++lastNodeId,new cNode());
+                            field[x,y].nodeId=lastNodeId;
                             //result[x, y] = true;
                         }
                         else
@@ -84,17 +87,17 @@ namespace Life
                 ;
             }
             
-            public Bitmap drawField(int scaleFactor)
+            public Bitmap olddrawField(int scaleFactor)
             {
-                int width = this.field.GetLength(0);
-                int height = this.field.GetLength(1);
+                int width = field.GetLength(0);
+                int height = field.GetLength(1);
                 Bitmap result = new Bitmap(width * scaleFactor, height * scaleFactor);
                 System.Drawing.Color color;
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        if (this.field[x, y].nodeId!=0)
+                        if (field[x, y].nodeId!=0)
                         {
                             color = System.Drawing.Color.Black;
                         }
@@ -115,12 +118,46 @@ namespace Life
                 return result;
             }
 
+            public void drawField(Graphics gr, int outWidth, int outHeight)
+            {
+                int width = field.GetLength(0);
+                int height = field.GetLength(1);
+                Bitmap result = new Bitmap(width, height);
+                Color color;
+                for (int x = 0; x < width; x++)
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        if (field[x, y].nodeId != 0)
+                        {
+                            color = Color.Black;
+                            result.SetPixel(x, y, color);
+                        }
+                        else
+                        {
+                            //color = Color.White;
+                        }
+
+                        //result.SetPixel(x, y, color);
+
+                    }
+                }
+                int scaleFactor = Math.Min(outWidth/width,outHeight/height);
+                if (scaleFactor < 1) scaleFactor = 1;
+
+                gr.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                gr.InterpolationMode = InterpolationMode.NearestNeighbor;
+
+                gr.FillRectangle(new SolidBrush(Color.White),0,0,outWidth,outHeight);
+                gr.DrawImage(result, 0, 0, width * scaleFactor, height * scaleFactor);
+            }
+
             public void nextGeneration()
             {
                 oldField = (sector[,]) field.Clone();
                 int neighborCount;
-                int width = this.field.GetLength(0);
-                int height = this.field.GetLength(1);
+                int width = field.GetLength(0);
+                int height = field.GetLength(1);
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = 0; y < height; y++)
@@ -187,7 +224,21 @@ namespace Life
 
             Glob.universe = new cUniverse();
             Glob.universe.genField(scaledWidth, scaledHeight, fillFactor);
-            pictureBox1.Image = Glob.universe.drawField(scaleFactor);
+            
+            //pictureBox1.Image.
+
+            Graphics gr = pictureBox1.CreateGraphics();
+            Glob.universe.drawField(gr,width,height);
+            
+            //Graphics gr = Graphics.FromImage(Glob.universe.newDrawField(0));
+            //Bitmap bmp = Glob.universe.drawField(0);
+            //pictureBox1.Image = bmp;
+            //gr.SmoothingMode=SmoothingMode.None;
+            //gr.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            //gr.InterpolationMode=InterpolationMode.NearestNeighbor;
+            //gr.DrawImage(bmp,0,0,scaledWidth*scaleFactor,scaledHeight*scaleFactor);
+            //pictureBox1.Image = Glob.universe.drawField(scaleFactor);
+
 
         }
 
@@ -209,7 +260,7 @@ namespace Life
             
             Glob.universe.genField(scaledWidth, scaledHeight, fillFactor);
 
-            pictureBox1.Image = Glob.universe.drawField(scaleFactor);
+            pictureBox1.Image = Glob.universe.olddrawField(scaleFactor);
 
         }
 
@@ -224,19 +275,20 @@ namespace Life
             //int fillFactor = 30;
 
             //int scaleFactor = decimal.ToInt32(nudScale.Value);
-            int scaleFactor = Math.Min(width / Glob.universe.field.GetLength(0), height / Glob.universe.field.GetLength(1));
-            if (scaleFactor < 1) scaleFactor = 1;
+            //int scaleFactor = Math.Min(width / Glob.universe.field.GetLength(0), height / Glob.universe.field.GetLength(1));
+            //if (scaleFactor < 1) scaleFactor = 1;
             //MessageBox.Show(scaleFactor.ToString());
 
-            int scaledWidth = width / scaleFactor;
-            int scaledHeight = height / scaleFactor;
+            //int scaledWidth = width / scaleFactor;
+            //int scaledHeight = height / scaleFactor;
 
 
             //Glob.universe.genField(scaledWidth, scaledHeight, fillFactor);
 
             Glob.universe.nextGeneration();
 
-            pictureBox1.Image = Glob.universe.drawField(scaleFactor);
+            Graphics gr = pictureBox1.CreateGraphics();
+            Glob.universe.drawField(gr, width, height);
         }
     }
 
