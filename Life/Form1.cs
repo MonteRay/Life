@@ -26,10 +26,38 @@ namespace Life
 
         }
 
+        public class BufferedField
+        {
+            // private readonly 
+        }
+
+        public class TorusFoldedField
+        {
+             
+        }
+
         public class Universe
         {
             public int lastNodeId;
-            
+            public int lastScaleFactor { get; private set; }
+
+            public void born(int x, int y)
+            {
+                nodes.Add(++lastNodeId, new Node());
+                field[x, y].nodeId = lastNodeId;
+            }
+
+            public void kill(int x, int y)
+            {
+
+                var nodeId = field[x, y].nodeId;
+                if (nodeId.HasValue)
+                {
+                    nodes.Remove(nodeId.Value);
+                    field[x, y].nodeId = null;
+                }
+            }
+
             public class Node
             {
                 //public int id { get; set; }
@@ -125,8 +153,7 @@ namespace Life
                         cc = rnd.Next(101);
                         if (cc < fillFactor)
                         {
-                            nodes.Add(++lastNodeId,new Node());
-                            field[x, y].nodeId=lastNodeId;
+                            born(x,y);
                             //result[x, y] = true;
                         }
                         else
@@ -199,6 +226,8 @@ namespace Life
                 int scaleFactor = Math.Min(outWidth/width,outHeight/height);
                 if (scaleFactor < 1) scaleFactor = 1;
 
+                lastScaleFactor = scaleFactor;
+
                 gr.PixelOffsetMode = PixelOffsetMode.HighQuality;
                 gr.InterpolationMode = InterpolationMode.NearestNeighbor;
 
@@ -223,23 +252,22 @@ namespace Life
                         field.swap();
                         if (nodeId.HasValue)
                         {
+                            field[x, y].nodeId = nodeId;
                             if (neighborCount != 2 && neighborCount != 3)
                             {
                                 //die
-                                nodes.Remove(nodeId.Value);
-                                field[x, y].nodeId = null;
+                                kill(x,y);
                             }
                             else
                             {
-                                field[x, y].nodeId = nodeId;
+                                
                             }
 
                         }
                         else if (neighborCount == 3)
                         {
                             //born
-                            nodes.Add(++lastNodeId, new Node());
-                            field[x, y].nodeId=lastNodeId;
+                            born(x,y);
                         }
 
                     }
