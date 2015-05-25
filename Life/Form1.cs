@@ -26,6 +26,14 @@ namespace Life
 
         }
 
+        public class Sector
+            {
+                public int? nodeId;
+
+                public Sector()
+                { }
+            }
+
         public class BufferedField
         {
             // private readonly 
@@ -33,7 +41,44 @@ namespace Life
 
         public class TorusFoldedField
         {
-             
+            private Sector [,] _field;
+
+            public int Width { get; private set; }
+            public int Height { get; private set; }
+
+            public TorusFoldedField(int width, int height)
+            {
+                Width = width;
+                Height = height;
+                _field=new Sector[Width,Height];
+                for (int x = 0; x < Width; x++)
+                {
+                    for (int y = 0; y < Height; y++)
+                    {
+                        _field[x, y] = new Sector();
+                    }
+                }
+            }
+
+            public Sector this[x,y] 
+            {
+                get 
+                {
+                    var _x=getCircularCoords(x,Width);
+                    var _y=getCircularCoords(y,Height);
+                    return _field[_x,_y];
+                }
+            }
+
+            public int getCircularCoords(int coord, int length)
+            {
+                if (length < 1) throw new ArgumentException("Размер пространства не может быть меньше 1", "length");
+                if (coord < 0) return length + coord % length;
+                if (coord >= length) return coord % length;
+                return coord;
+            } 
+
+
         }
 
         public class Universe
@@ -65,18 +110,10 @@ namespace Life
                 public int gender;
             }
 
-            public class sector
-            {
-                public int? nodeId;
-
-                public sector()
-                { }
-            }
-
-
+            
             public class Field
             {
-                private sector[,,] sectors;
+                private Sector[,,] sectors;
                 private int currentLayer;
 
                 public void swap()
@@ -86,13 +123,13 @@ namespace Life
 
                 public Field(int width, int height)
                 {
-                    sectors=new sector[2,width,height];
+                    sectors=new Sector[2,width,height];
                     for (int x = 0; x < width; x++)
                     {
                         for (int y = 0; y < height; y++)
                         {
-                            sectors[0, x, y] = new sector();
-                            sectors[1, x, y] = new sector();
+                            sectors[0, x, y] = new Sector();
+                            sectors[1, x, y] = new Sector();
                         }
                     }
                     currentLayer = 0;
@@ -104,7 +141,7 @@ namespace Life
                 }
                  * */
 
-                public sector this[int cx, int cy]
+                public Sector this[int cx, int cy]
                 {
                     get
                     {
