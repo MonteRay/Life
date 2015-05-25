@@ -34,9 +34,11 @@ namespace Life
                 { }
             }
 
-        public class BufferedField
+        public class Node
         {
-            // private readonly 
+            //public int id { get; set; }
+            public int age { get; set; }
+            public int gender;
         }
 
         public class TorusFoldedField
@@ -60,17 +62,17 @@ namespace Life
                 }
             }
 
-            public Sector this[x,y] 
+            public Sector this[int x, int y] 
             {
                 get 
                 {
-                    var _x=getCircularCoords(x,Width);
-                    var _y=getCircularCoords(y,Height);
+                    var _x=GetCircularCoords(x,Width);
+                    var _y=GetCircularCoords(y,Height);
                     return _field[_x,_y];
                 }
             }
 
-            public int getCircularCoords(int coord, int length)
+            public int GetCircularCoords(int coord, int length)
             {
                 if (length < 1) throw new ArgumentException("Размер пространства не может быть меньше 1", "length");
                 if (coord < 0) return length + coord % length;
@@ -81,36 +83,63 @@ namespace Life
 
         }
 
+        public class BufferedField
+        {
+            private readonly TorusFoldedField _first, _second;
+            private bool _swapped = false;
+
+            public int Width { get; private set; }
+            public int Height { get; private set; }
+
+            public BufferedField(int width, int height)
+            {
+                Width = width;
+                Height = height;
+                _first = new TorusFoldedField(Width,Height);
+                _second = new TorusFoldedField(Width,Height);
+            }
+
+            public TorusFoldedField Front
+            {
+                get { return _swapped ? _second : _first; }
+            }
+
+            public TorusFoldedField Back
+            {
+                get { return _swapped ? _first : _second; }
+            }
+
+            public void Swap()
+            {
+                _swapped = !_swapped;
+            }
+        }
+
         public class Universe
         {
-            public int lastNodeId;
-            public int lastScaleFactor { get; private set; }
+            public int _lastNodeId;
+            public int _lastScaleFactor { get; private set; }
 
             public void born(int x, int y)
             {
-                nodes.Add(++lastNodeId, new Node());
-                field[x, y].nodeId = lastNodeId;
+                nodes.Add(++_lastNodeId, new Node());
+                field.Front[x, y].nodeId = _lastNodeId;
             }
 
             public void kill(int x, int y)
             {
 
-                var nodeId = field[x, y].nodeId;
+                var nodeId = field.Front[x, y].nodeId;
                 if (nodeId.HasValue)
                 {
                     nodes.Remove(nodeId.Value);
-                    field[x, y].nodeId = null;
+                    field.Front[x, y].nodeId = null;
                 }
             }
 
-            public class Node
-            {
-                //public int id { get; set; }
-                public int age { get; set; }
-                public int gender;
-            }
 
-            
+
+            /*
             public class Field
             {
                 private Sector[,,] sectors;
@@ -139,7 +168,7 @@ namespace Life
                 {
                     this.sectors = sectors.Clone() as sector[,];
                 }
-                 * */
+                 * * /
 
                 public Sector this[int cx, int cy]
                 {
@@ -162,17 +191,18 @@ namespace Life
                 {
                     return new Field(this.sectors);
                 }
-                */
+                * /
             }
+             */
 
             //public sector[,] field, oldField;
-            public Field field; //oldField;
+            public BufferedField field; //oldField;
 
             public Dictionary<int,Node> nodes;
 
             public Universe()
             {
-                lastNodeId = -1;
+                _lastNodeId = -1;
                 nodes = new Dictionary<int, Node>();
 
              }
@@ -182,7 +212,7 @@ namespace Life
                 int cc;
                 Random rnd = new Random();
                 nodes.Clear();
-                field = new Field(width,height);
+                field = new BufferedField(width,height);
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = 0; y < height; y++)
@@ -238,15 +268,15 @@ namespace Life
 
             public void drawField(Graphics gr, int outWidth, int outHeight)
             {
-                int width = field.width;
-                int height = field.height;
+                int width = field.Width;
+                int height = field.Height;
                 Bitmap result = new Bitmap(width, height);
                 Color color;
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        if (field[x, y].nodeId.HasValue)
+                        if (field.Front[x, y].nodeId.HasValue)
                         {
                             color = Color.Black;
                             result.SetPixel(x, y, color);
@@ -263,7 +293,7 @@ namespace Life
                 int scaleFactor = Math.Min(outWidth/width,outHeight/height);
                 if (scaleFactor < 1) scaleFactor = 1;
 
-                lastScaleFactor = scaleFactor;
+                _lastScaleFactor = scaleFactor;
 
                 gr.PixelOffsetMode = PixelOffsetMode.HighQuality;
                 gr.InterpolationMode = InterpolationMode.NearestNeighbor;
@@ -275,29 +305,28 @@ namespace Life
             public void nextGeneration()
             {
                 int neighborCount;
-                int width = field.width;
-                int height = field.height;
+                int width = field.Width;
+                int height = field.Height;
 
-                field.swap();
+                field.Swap();
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        field.swap();
-                        neighborCount = countNeighbors(x, y);
-                        var nodeId = field[x, y].nodeId;
-                        field.swap();
+                        neighborCount = countNeighbors(x, y, field.Back);
+                        var nodeId = field.Back[x, y].nodeId;
+
                         if (nodeId.HasValue)
                         {
-                            field[x, y].nodeId = nodeId;
-                            if (neighborCount != 2 && neighborCount != 3)
+                            field.Front[x, y].nodeId = nodeId;
+                            if (neighborCount == 2 || neighborCount == 3)
                             {
-                                //die
-                                kill(x,y);
+                                
                             }
                             else
                             {
-                                
+                                //die
+                                kill(x, y);
                             }
 
                         }
@@ -306,14 +335,18 @@ namespace Life
                             //born
                             born(x,y);
                         }
+                        else
+                        {
+                            field.Front[x, y].nodeId = null;
+                        }
 
                     }
                 }
             }
 
-            public int countNeighbors(int sx, int sy) 
+            public int countNeighbors(int sx, int sy, TorusFoldedField field) 
             {
-                if (sx >= field.width || sy >= field.height) return -1;
+                if (sx >= field.Width || sy >= field.Height) return -1;
                 int result = 0;
                 int x,y;
                 for (x = sx - 1; x <= sx + 1; x++)
@@ -340,7 +373,7 @@ namespace Life
             int height = pictureBox1.Height;
             int fillFactor = decimal.ToInt32(nudFillFactor.Value);
 
-            int scaleFactor = decimal.ToInt32(nudScale.Value);
+            int scaleFactor = decimal.ToInt32(nudScaleFactor.Value);
 
             int scaledWidth = width / scaleFactor;
             int scaledHeight = height / scaleFactor;
@@ -416,8 +449,39 @@ namespace Life
         private void startStopBtn_Click(object sender, EventArgs e)
         {
             tmr.Enabled = !tmr.Enabled;
+            startStopBtn.BackColor = tmr.Enabled ? Color.LightGreen : Color.LightCoral;
 
+
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            if (Glob.universe == null) return;
             
+            MouseEventArgs eventArgs = e as MouseEventArgs;
+            //MessageBox.Show(eventArgs.X.ToString() + " " + eventArgs.Y.ToString());
+            int scaleFactor = Glob.universe._lastScaleFactor;
+            int scaledX = eventArgs.X/scaleFactor;
+            int scaledY = eventArgs.Y/scaleFactor;
+
+            if (Glob.universe.field.Front[scaledX,scaledY].nodeId.HasValue)
+            {
+                Glob.universe.kill(scaledX,scaledY);
+            }
+            else
+            {
+                Glob.universe.born(scaledX,scaledY);
+            }
+
+            int width = pictureBox1.Width;
+            int height = pictureBox1.Height;
+            Graphics gr = pictureBox1.CreateGraphics();
+            Glob.universe.drawField(gr, width, height);
+        }
+
+        private void nudInterval_ValueChanged(object sender, EventArgs e)
+        {
+            tmr.Interval = decimal.ToInt32(nudInterval.Value);
         }
     }
 
