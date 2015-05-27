@@ -30,25 +30,27 @@
         {
             this.components = new System.ComponentModel.Container();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.lblInterval = new System.Windows.Forms.Label();
+            this.lblFillFactor = new System.Windows.Forms.Label();
+            this.lblScaleFactor = new System.Windows.Forms.Label();
+            this.nudInterval = new System.Windows.Forms.NumericUpDown();
             this.nudFillFactor = new System.Windows.Forms.NumericUpDown();
             this.nudScaleFactor = new System.Windows.Forms.NumericUpDown();
             this.startStopBtn = new System.Windows.Forms.Button();
             this.BtnGen = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.tmr = new System.Windows.Forms.Timer(this.components);
-            this.lblScaleFactor = new System.Windows.Forms.Label();
-            this.lblFillFactor = new System.Windows.Forms.Label();
-            this.lblInterval = new System.Windows.Forms.Label();
-            this.nudInterval = new System.Windows.Forms.NumericUpDown();
+            this.cbMovingNodes = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudInterval)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudFillFactor)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudScaleFactor)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nudInterval)).BeginInit();
             this.SuspendLayout();
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.cbMovingNodes);
             this.panel1.Controls.Add(this.lblInterval);
             this.panel1.Controls.Add(this.lblFillFactor);
             this.panel1.Controls.Add(this.lblScaleFactor);
@@ -60,8 +62,63 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(101, 230);
+            this.panel1.Size = new System.Drawing.Size(101, 247);
             this.panel1.TabIndex = 3;
+            // 
+            // lblInterval
+            // 
+            this.lblInterval.Location = new System.Drawing.Point(12, 165);
+            this.lblInterval.Name = "lblInterval";
+            this.lblInterval.Size = new System.Drawing.Size(75, 23);
+            this.lblInterval.TabIndex = 7;
+            this.lblInterval.Text = "Interval";
+            this.lblInterval.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblFillFactor
+            // 
+            this.lblFillFactor.Location = new System.Drawing.Point(12, 116);
+            this.lblFillFactor.Name = "lblFillFactor";
+            this.lblFillFactor.Size = new System.Drawing.Size(75, 23);
+            this.lblFillFactor.TabIndex = 7;
+            this.lblFillFactor.Text = "Fill Factor";
+            this.lblFillFactor.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblScaleFactor
+            // 
+            this.lblScaleFactor.Location = new System.Drawing.Point(12, 67);
+            this.lblScaleFactor.Name = "lblScaleFactor";
+            this.lblScaleFactor.Size = new System.Drawing.Size(75, 23);
+            this.lblScaleFactor.TabIndex = 7;
+            this.lblScaleFactor.Text = "Scale Factor";
+            this.lblScaleFactor.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // nudInterval
+            // 
+            this.nudInterval.Increment = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.nudInterval.Location = new System.Drawing.Point(12, 191);
+            this.nudInterval.Maximum = new decimal(new int[] {
+            5000,
+            0,
+            0,
+            0});
+            this.nudInterval.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.nudInterval.Name = "nudInterval";
+            this.nudInterval.Size = new System.Drawing.Size(75, 20);
+            this.nudInterval.TabIndex = 6;
+            this.nudInterval.Value = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.nudInterval.ValueChanged += new System.EventHandler(this.nudInterval_ValueChanged);
             // 
             // nudFillFactor
             // 
@@ -129,7 +186,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox1.Location = new System.Drawing.Point(107, 0);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(396, 230);
+            this.pictureBox1.Size = new System.Drawing.Size(396, 247);
             this.pictureBox1.TabIndex = 4;
             this.pictureBox1.TabStop = false;
             this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
@@ -139,76 +196,31 @@
             this.tmr.Interval = 1000;
             this.tmr.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // lblScaleFactor
+            // cbMovingNodes
             // 
-            this.lblScaleFactor.Location = new System.Drawing.Point(12, 67);
-            this.lblScaleFactor.Name = "lblScaleFactor";
-            this.lblScaleFactor.Size = new System.Drawing.Size(75, 23);
-            this.lblScaleFactor.TabIndex = 7;
-            this.lblScaleFactor.Text = "Scale Factor";
-            this.lblScaleFactor.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lblFillFactor
-            // 
-            this.lblFillFactor.Location = new System.Drawing.Point(12, 116);
-            this.lblFillFactor.Name = "lblFillFactor";
-            this.lblFillFactor.Size = new System.Drawing.Size(75, 23);
-            this.lblFillFactor.TabIndex = 7;
-            this.lblFillFactor.Text = "Fill Factor";
-            this.lblFillFactor.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lblInterval
-            // 
-            this.lblInterval.Location = new System.Drawing.Point(12, 165);
-            this.lblInterval.Name = "lblInterval";
-            this.lblInterval.Size = new System.Drawing.Size(75, 23);
-            this.lblInterval.TabIndex = 7;
-            this.lblInterval.Text = "Interval";
-            this.lblInterval.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // nudInterval
-            // 
-            this.nudInterval.Increment = new decimal(new int[] {
-            100,
-            0,
-            0,
-            0});
-            this.nudInterval.Location = new System.Drawing.Point(12, 191);
-            this.nudInterval.Maximum = new decimal(new int[] {
-            5000,
-            0,
-            0,
-            0});
-            this.nudInterval.Minimum = new decimal(new int[] {
-            100,
-            0,
-            0,
-            0});
-            this.nudInterval.Name = "nudInterval";
-            this.nudInterval.Size = new System.Drawing.Size(75, 20);
-            this.nudInterval.TabIndex = 6;
-            this.nudInterval.Value = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            this.nudInterval.ValueChanged += new System.EventHandler(this.nudInterval_ValueChanged);
+            this.cbMovingNodes.Location = new System.Drawing.Point(12, 218);
+            this.cbMovingNodes.Name = "cbMovingNodes";
+            this.cbMovingNodes.Size = new System.Drawing.Size(75, 24);
+            this.cbMovingNodes.TabIndex = 8;
+            this.cbMovingNodes.Text = "Moving";
+            this.cbMovingNodes.UseVisualStyleBackColor = true;
+            this.cbMovingNodes.CheckedChanged += new System.EventHandler(this.cbMovingNodes_CheckedChanged);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(503, 230);
+            this.ClientSize = new System.Drawing.Size(503, 247);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.panel1);
             this.MinimumSize = new System.Drawing.Size(200, 150);
             this.Name = "Form1";
             this.Text = "Form1";
             this.panel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.nudInterval)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudFillFactor)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudScaleFactor)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nudInterval)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -226,6 +238,7 @@
         private System.Windows.Forms.Label lblInterval;
         private System.Windows.Forms.Label lblFillFactor;
         private System.Windows.Forms.NumericUpDown nudInterval;
+        private System.Windows.Forms.CheckBox cbMovingNodes;
 
     }
 }

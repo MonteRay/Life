@@ -135,6 +135,9 @@ namespace Life
             public int _lastNodeId;
             public int _lastScaleFactor { get; private set; }
 
+            public bool movingNodes;
+
+
             public void born(int x, int y)
             {
                 nodes.Add(++_lastNodeId, new Node());
@@ -357,6 +360,27 @@ namespace Life
 
                     }
                 }
+
+                if (!movingNodes) return;
+                for (int x = 0; x < width; x++)
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        var nodeId = field.Front[x, y].nodeId;
+                        if (nodeId.HasValue)
+                        {
+                            int dx = _random.Next(3) - 1;
+                            int dy = _random.Next(3) - 1;
+                            if (dx == 0 && dy == 0) continue;
+                            if (!field.Front[x + dx, y + dy].nodeId.HasValue)
+                            {
+                                field.Front[x + dx, y + dy].nodeId = nodeId;
+                                field.Front[x, y].nodeId = null;
+                            }
+                        }
+                    }
+
+                }
             }
 
             public int countNeighbors(int sx, int sy, TorusFoldedField field) 
@@ -395,6 +419,7 @@ namespace Life
 
             Glob.universe = new Universe();
             Glob.universe.genField(scaledWidth, scaledHeight, fillFactor);
+            Glob.universe.movingNodes=cbMovingNodes.Checked;
             
             //pictureBox1.Image.
 
@@ -497,6 +522,12 @@ namespace Life
         private void nudInterval_ValueChanged(object sender, EventArgs e)
         {
             tmr.Interval = decimal.ToInt32(nudInterval.Value);
+        }
+
+        private void cbMovingNodes_CheckedChanged(object sender, EventArgs e)
+        {
+            if (Glob.universe == null) return;
+            Glob.universe.movingNodes = cbMovingNodes.Checked;
         }
     }
 
