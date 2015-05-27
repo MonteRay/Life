@@ -7,18 +7,26 @@ using System.Windows.Forms;
 namespace Life
 {
 
+
     public partial class Form1 : Form
     {
         public Form1()
         {
             InitializeComponent();
+            _random.Next();
         }
 
-        //public class tField:
-        //   public bool genField()
-        // {
-        //
-        // }
+        public enum Gender { Male, Female };
+
+        static Random _random = new Random();
+
+        static T RandomEnumValue<T>()
+        {
+            Array _values = Enum.GetValues(typeof(T));
+            return (T)_values.GetValue(_random.Next(_values.Length));
+        }
+
+
         public static class Glob
         {
             public static bool[,] field;
@@ -34,11 +42,18 @@ namespace Life
                 { }
             }
 
+
         public class Node
         {
             //public int id { get; set; }
-            public int age { get; set; }
-            public int gender;
+            public int age;
+            public double resource; 
+            public Gender gender;
+
+            public Node()
+            {
+                gender = RandomEnumValue<Gender>();
+            }
         }
 
         public class TorusFoldedField
@@ -278,7 +293,7 @@ namespace Life
                     {
                         if (field.Front[x, y].nodeId.HasValue)
                         {
-                            color = Color.Black;
+                            color = nodes[field.Front[x,y].nodeId.Value].gender==Gender.Male ? Color.Blue : Color.Red;
                             result.SetPixel(x, y, color);
                         }
                         else
