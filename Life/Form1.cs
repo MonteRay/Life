@@ -128,6 +128,14 @@ namespace Life
             {
                 _swapped = !_swapped;
             }
+
+            public Sector this[int x, int y]
+            {
+                get
+                {
+                    return Front[x, y];
+                }
+            }
         }
 
         public class Universe
@@ -147,11 +155,11 @@ namespace Life
             public void kill(int x, int y)
             {
 
-                var nodeId = field.Front[x, y].nodeId;
+                var nodeId = field[x, y].nodeId;
                 if (nodeId.HasValue)
                 {
                     nodes.Remove(nodeId.Value);
-                    field.Front[x, y].nodeId = null;
+                    field[x, y].nodeId = null;
                 }
             }
 
@@ -294,9 +302,9 @@ namespace Life
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        if (field.Front[x, y].nodeId.HasValue)
+                        if (field[x, y].nodeId.HasValue)
                         {
-                            color = nodes[field.Front[x,y].nodeId.Value].gender==Gender.Male ? Color.Blue : Color.Red;
+                            color = nodes[field[x,y].nodeId.Value].gender==Gender.Male ? Color.Blue : Color.Red;
                             result.SetPixel(x, y, color);
                         }
                         else
@@ -336,7 +344,7 @@ namespace Life
 
                         if (nodeId.HasValue)
                         {
-                            field.Front[x, y].nodeId = nodeId;
+                            field[x, y].nodeId = nodeId;
                             if (neighborCount == 2 || neighborCount == 3)
                             {
                                 
@@ -355,7 +363,7 @@ namespace Life
                         }
                         else
                         {
-                            field.Front[x, y].nodeId = null;
+                            field[x, y].nodeId = null;
                         }
 
                     }
@@ -366,16 +374,16 @@ namespace Life
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        var nodeId = field.Front[x, y].nodeId;
+                        var nodeId = field[x, y].nodeId;
                         if (nodeId.HasValue)
                         {
                             int dx = _random.Next(3) - 1;
                             int dy = _random.Next(3) - 1;
                             if (dx == 0 && dy == 0) continue;
-                            if (!field.Front[x + dx, y + dy].nodeId.HasValue)
+                            if (!field[x + dx, y + dy].nodeId.HasValue)
                             {
-                                field.Front[x + dx, y + dy].nodeId = nodeId;
-                                field.Front[x, y].nodeId = null;
+                                field[x + dx, y + dy].nodeId = nodeId;
+                                field[x, y].nodeId = null;
                             }
                         }
                     }
