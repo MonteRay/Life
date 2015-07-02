@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Life
 {
@@ -145,6 +147,8 @@ namespace Life
 
             public bool movingNodes;
 
+            public bool processing { get; private set; }
+
 
             public void born(int x, int y)
             {
@@ -235,6 +239,7 @@ namespace Life
 
             public void genField(int width, int height, int fillFactor)
             {
+                processing = true;
                 int cc;
                 Random rnd = new Random();
                 nodes.Clear();
@@ -257,6 +262,7 @@ namespace Life
 
                     }
                 }
+                processing = false;
             }
             
             /*
@@ -330,6 +336,7 @@ namespace Life
 
             public void nextGeneration()
             {
+                processing = true;
                 int neighborCount;
                 int width = field.Width;
                 int height = field.Height;
@@ -368,8 +375,8 @@ namespace Life
 
                     }
                 }
-
-                if (!movingNodes) return;
+              
+                if (!movingNodes) {processing = false; return;}
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = 0; y < height; y++)
@@ -389,6 +396,7 @@ namespace Life
                     }
 
                 }
+                processing = false;
             }
 
             public int countNeighbors(int sx, int sy, TorusFoldedField field) 
@@ -449,7 +457,10 @@ namespace Life
         private void timer1_Tick(object sender, EventArgs e)
         {
 
-            if (Glob.universe == null) return;
+            if (Glob.universe == null || Glob.universe.processing) return;
+
+            //Thread mThread = new Thread(Glob.universe.nextGeneration);
+
 
             int width = pictureBox1.Width;
             int height = pictureBox1.Height;
@@ -466,10 +477,15 @@ namespace Life
 
             //Glob.universe.genField(scaledWidth, scaledHeight, fillFactor);
 
-            Glob.universe.nextGeneration();
-
             Graphics gr = pictureBox1.CreateGraphics();
             Glob.universe.drawField(gr, width, height);
+
+            new Thread(() =>
+            {
+                Glob.universe.nextGeneration();
+            }
+                ).Start();
+            
 
 
             /*
