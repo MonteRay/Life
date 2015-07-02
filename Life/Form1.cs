@@ -485,7 +485,7 @@ namespace Life
                 Glob.universe.nextGeneration();
             }
                 ).Start();
-            
+         
 
 
             /*
