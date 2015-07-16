@@ -149,7 +149,8 @@ namespace Life
 
             public bool processing { get; private set; }
 
-
+            public bool nextGenerationReady;
+            
             public void born(int x, int y)
             {
                 nodes.Add(++_lastNodeId, new Node());
