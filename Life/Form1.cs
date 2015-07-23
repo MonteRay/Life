@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using System.Windows.Forms;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,10 +52,14 @@ namespace Life
             public int age;
             public double resource; 
             public Gender gender;
+            public int x;
+            public int y;
 
-            public Node()
+            public Node(int x, int y)
             {
                 gender = RandomEnumValue<Gender>();
+                this.x = x;
+                this.y = y;
             }
         }
 
@@ -150,14 +155,22 @@ namespace Life
             public bool processing { get; private set; }
 
             public bool nextGenerationReady;
-            
-            public void born(int x, int y)
+
+
+            public void preBornNode(int x, int y)
             {
-                nodes.Add(++_lastNodeId, new Node());
+                int nodeId = _lastNodeId + 1 + bornList.Count;
+                bornList.Add(nodeId, new Node(x,y));
+                field.Back[x, y].nodeId = nodeId;
+            }
+
+            public void bornNode(int x, int y)
+            {
+                nodes.Add(++_lastNodeId, new Node(x,y));
                 field.Front[x, y].nodeId = _lastNodeId;
             }
 
-            public void kill(int x, int y)
+            public void killNode(int x, int y)
             {
 
                 var nodeId = field[x, y].nodeId;
@@ -166,6 +179,11 @@ namespace Life
                     nodes.Remove(nodeId.Value);
                     field[x, y].nodeId = null;
                 }
+            }
+
+            public void killNode(int nodeId)
+            {
+                killNode(nodes[nodeId].x,nodes[nodeId].y);
             }
 
 
@@ -231,10 +249,18 @@ namespace Life
 
             public Dictionary<int,Node> nodes;
 
+
+            private Dictionary<int, Node> bornList;
+
+            private List<int> killList;
+
+
             public Universe()
             {
                 _lastNodeId = -1;
                 nodes = new Dictionary<int, Node>();
+                bornList = new Dictionary<int, Node>();
+                killList=new List<int>();
 
              }
 
@@ -252,7 +278,7 @@ namespace Life
                         cc = rnd.Next(101);
                         if (cc < fillFactor)
                         {
-                            born(x,y);
+                            bornNode(x,y);
                             //result[x, y] = true;
                         }
                         else
@@ -335,9 +361,85 @@ namespace Life
                 gr.DrawImage(result, 0, 0, width * scaleFactor, height * scaleFactor);
             }
 
-            public void nextGeneration()
+            public void prepareNextGeneration()
             {
                 processing = true;
+                int neighborCount;
+                int width = field.Width;
+                int height = field.Height;
+
+                //field.Swap();
+                for (int x = 0; x < width; x++)
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        neighborCount = countNeighbors(x, y, field.Front);
+                        var nodeId = field.Front[x, y].nodeId;
+
+                        if (nodeId.HasValue)
+                        {
+                            field.Back[x, y].nodeId = nodeId;
+                            if (neighborCount == 2 || neighborCount == 3)
+                            {
+
+                            }
+                            else
+                            {
+                                //die
+                                killList.Add(nodeId.Value);
+                            }
+
+                        }
+                        else if (neighborCount == 3)
+                        {
+                            //born
+                            preBornNode(x, y);
+                        }
+                        else
+                        {
+                            field.Back[x, y].nodeId = null;
+                        }
+
+                    }
+                }
+
+                if (!movingNodes) { processing = false; return; }
+                for (int x = 0; x < width; x++)
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        var nodeId = field.Back[x, y].nodeId;
+                        if (nodeId.HasValue)
+                        {
+                            int dx = _random.Next(3) - 1;
+                            int dy = _random.Next(3) - 1;
+                            if (dx == 0 && dy == 0) continue;
+                            if (!field.Back[x + dx, y + dy].nodeId.HasValue)
+                            {
+                                field.Back[x + dx, y + dy].nodeId = nodeId;
+                                field.Back[x, y].nodeId = null;
+                            }
+                        }
+                    }
+
+                }
+                processing = false;
+            }
+
+            public void nextGeneration()
+            {
+
+                field.Swap();
+                nodes=nodes.Concat(bornList).ToDictionary(e=>e.Key,e=>e.Value);
+                _lastNodeId += bornList.Count;
+                bornList.Clear();
+                foreach (int nodeId in killList)
+                {
+                    killNode(nodeId);
+                }
+                killList.Clear();
+
+             /* processing = true;
                 int neighborCount;
                 int width = field.Width;
                 int height = field.Height;
@@ -360,14 +462,14 @@ namespace Life
                             else
                             {
                                 //die
-                                kill(x, y);
+                                killNode(x, y);
                             }
 
                         }
                         else if (neighborCount == 3)
                         {
                             //born
-                            born(x,y);
+                            bornNode(x,y);
                         }
                         else
                         {
@@ -398,6 +500,7 @@ namespace Life
 
                 }
                 processing = false;
+                */
             }
 
             public int countNeighbors(int sx, int sy, TorusFoldedField field) 
@@ -460,6 +563,21 @@ namespace Life
 
             if (Glob.universe == null || Glob.universe.processing) return;
 
+            Glob.universe.prepareNextGeneration();
+
+            Glob.universe.nextGeneration();
+
+
+            int width = pictureBox1.Width;
+            int height = pictureBox1.Height;
+
+            Graphics gr = pictureBox1.CreateGraphics();
+            Glob.universe.drawField(gr, width, height);
+
+
+            /*
+            if (Glob.universe == null || Glob.universe.processing) return;
+
             //Thread mThread = new Thread(Glob.universe.nextGeneration);
 
 
@@ -487,7 +605,7 @@ namespace Life
             }
                 ).Start();
          
-
+            */
 
             /*
             if (Glob.universe == null) return;
@@ -513,8 +631,13 @@ namespace Life
 
         private void startStopBtn_Click(object sender, EventArgs e)
         {
+            
             tmr.Enabled = !tmr.Enabled;
             startStopBtn.BackColor = tmr.Enabled ? Color.LightGreen : Color.LightCoral;
+            
+
+            
+
 
 
         }
@@ -531,11 +654,11 @@ namespace Life
 
             if (Glob.universe.field.Front[scaledX,scaledY].nodeId.HasValue)
             {
-                Glob.universe.kill(scaledX,scaledY);
+                Glob.universe.killNode(scaledX,scaledY);
             }
             else
             {
-                Glob.universe.born(scaledX,scaledY);
+                Glob.universe.bornNode(scaledX,scaledY);
             }
 
             int width = pictureBox1.Width;
