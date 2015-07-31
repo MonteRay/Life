@@ -156,6 +156,7 @@ namespace Life
 
             public bool nextGenerationReady;
 
+            public Bitmap FieldScaledBitmap;
 
             public void preBornNode(int x, int y)
             {
@@ -261,6 +262,7 @@ namespace Life
                 nodes = new Dictionary<int, Node>();
                 bornList = new Dictionary<int, Node>();
                 killList=new List<int>();
+                //FieldScaledBitmap = new Bitmap();
 
              }
 
@@ -291,7 +293,7 @@ namespace Life
                 }
                 processing = false;
             }
-            
+
             /*
             public Bitmap olddrawField(int scaleFactor)
             {
@@ -325,6 +327,47 @@ namespace Life
             }
             */
 
+            public async void drawField()
+            {
+                int width = field.Width;
+                int height = field.Height;
+                int outWidth = FieldScaledBitmap.Width;
+                int outHeight = FieldScaledBitmap.Height;
+
+                Bitmap result = new Bitmap(width, height);
+                Color color;
+                for (int x = 0; x < width; x++)
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        if (field[x, y].nodeId.HasValue)
+                        {
+                            color = nodes[field[x, y].nodeId.Value].gender == Gender.Male ? Color.Blue : Color.Red;
+                            result.SetPixel(x, y, color);
+                        }
+                        else
+                        {
+                            //color = Color.White;
+                        }
+
+                        //result.SetPixel(x, y, color);
+
+                    }
+                }
+                int scaleFactor = Math.Min(outWidth / width, outHeight / height);
+                if (scaleFactor < 1) scaleFactor = 1;
+
+                _lastScaleFactor = scaleFactor;
+
+                Graphics gr = Graphics.FromImage(FieldScaledBitmap);
+
+                gr.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                gr.InterpolationMode = InterpolationMode.NearestNeighbor;
+
+                gr.FillRectangle(new SolidBrush(Color.White), 0, 0, outWidth, outHeight);
+                gr.DrawImage(result, 0, 0, width * scaleFactor, height * scaleFactor);
+            }
+            /*
             public void drawField(Graphics gr, int outWidth, int outHeight)
             {
                 int width = field.Width;
@@ -360,9 +403,11 @@ namespace Life
                 gr.FillRectangle(new SolidBrush(Color.White),0,0,outWidth,outHeight);
                 gr.DrawImage(result, 0, 0, width * scaleFactor, height * scaleFactor);
             }
+            */
 
-            public void prepareNextGeneration()
+            public async void prepareNextGeneration()
             {
+                nextGenerationReady = false;
                 processing = true;
                 int neighborCount;
                 int width = field.Width;
@@ -403,7 +448,7 @@ namespace Life
                     }
                 }
 
-                if (!movingNodes) { processing = false; return; }
+                if (!movingNodes) { processing = false; nextGenerationReady = true; return; }
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = 0; y < height; y++)
@@ -424,13 +469,19 @@ namespace Life
 
                 }
                 processing = false;
+                nextGenerationReady = true;
             }
 
-            public void nextGeneration()
+            public async void nextGeneration()
             {
 
+                if (!nextGenerationReady) { return;}
                 field.Swap();
-                nodes=nodes.Concat(bornList).ToDictionary(e=>e.Key,e=>e.Value);
+                //nodes=nodes.Concat(bornList).ToDictionary(e=>e.Key,e=>e.Value);
+                foreach (var node in bornList)
+                {
+                    nodes.Add(node.Key,node.Value);
+                }
                 _lastNodeId += bornList.Count;
                 bornList.Clear();
                 foreach (int nodeId in killList)
@@ -438,6 +489,8 @@ namespace Life
                     killNode(nodeId);
                 }
                 killList.Clear();
+
+            }
 
              /* processing = true;
                 int neighborCount;
@@ -500,8 +553,8 @@ namespace Life
 
                 }
                 processing = false;
-                */
-            }
+               
+            } */
 
             public int countNeighbors(int sx, int sy, TorusFoldedField field) 
             {
@@ -540,65 +593,36 @@ namespace Life
             Glob.universe = new Universe();
             Glob.universe.genField(scaledWidth, scaledHeight, fillFactor);
             Glob.universe.movingNodes=cbMovingNodes.Checked;
-            
+
+            Glob.universe.FieldScaledBitmap = new Bitmap(scaledWidth*scaleFactor,scaledHeight*scaleFactor);
+            Glob.universe.drawField();
+            pictureBox1.Invalidate();
             //pictureBox1.Image.
 
-            Graphics gr = pictureBox1.CreateGraphics();
-            Glob.universe.drawField(gr,width,height);
+            //Graphics gr = pictureBox1.CreateGraphics();
+            //Glob.universe.drawField(gr,width,height);
             
-            //Graphics gr = Graphics.FromImage(Glob.universe.newDrawField(0));
-            //Bitmap bmp = Glob.universe.drawField(0);
-            //pictureBox1.Image = bmp;
-            //gr.SmoothingMode=SmoothingMode.None;
-            //gr.PixelOffsetMode = PixelOffsetMode.HighQuality;
-            //gr.InterpolationMode=InterpolationMode.NearestNeighbor;
-            //gr.DrawImage(bmp,0,0,scaledWidth*scaleFactor,scaledHeight*scaleFactor);
-            //pictureBox1.Image = Glob.universe.drawField(scaleFactor);
-
-
+            
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private async void timer1_Tick(object sender, EventArgs e)
         {
 
-            if (Glob.universe == null || Glob.universe.processing) return;
+            if (Glob.universe == null) return;
 
             Glob.universe.prepareNextGeneration();
-
             Glob.universe.nextGeneration();
+            Glob.universe.drawField();
+            pictureBox1.Invalidate();
 
 
-            int width = pictureBox1.Width;
-            int height = pictureBox1.Height;
 
-            Graphics gr = pictureBox1.CreateGraphics();
-            Glob.universe.drawField(gr, width, height);
+            //int width = pictureBox1.Width;
+            //int height = pictureBox1.Height;
 
+            //Graphics gr = pictureBox1.CreateGraphics();
 
             /*
-            if (Glob.universe == null || Glob.universe.processing) return;
-
-            //Thread mThread = new Thread(Glob.universe.nextGeneration);
-
-
-            int width = pictureBox1.Width;
-            int height = pictureBox1.Height;
-            //int fillFactor = 30;
-
-            //int scaleFactor = decimal.ToInt32(nudScale.Value);
-            //int scaleFactor = Math.Min(width / Glob.universe.field.GetLength(0), height / Glob.universe.field.GetLength(1));
-            //if (scaleFactor < 1) scaleFactor = 1;
-            //MessageBox.Show(scaleFactor.ToString());
-
-            //int scaledWidth = width / scaleFactor;
-            //int scaledHeight = height / scaleFactor;
-
-
-            //Glob.universe.genField(scaledWidth, scaledHeight, fillFactor);
-
-            Graphics gr = pictureBox1.CreateGraphics();
-            Glob.universe.drawField(gr, width, height);
-
             new Thread(() =>
             {
                 Glob.universe.nextGeneration();
@@ -607,25 +631,7 @@ namespace Life
          
             */
 
-            /*
-            if (Glob.universe == null) return;
 
-            int width = pictureBox1.Width;
-            int height = pictureBox1.Height;
-            int fillFactor = 30;
-
-             
-            int scaleFactor = decimal.ToInt32(nudScale.Value);
-            //int scaleFactor = Math.Min(width / Glob.universe.field.GetLength(0), height / Glob.universe.field.GetLength(1));
-
-            int scaledWidth = width/scaleFactor;
-            int scaledHeight = height/scaleFactor;
-
-            
-            Glob.universe.genField(scaledWidth, scaledHeight, fillFactor);
-
-            pictureBox1.Image = Glob.universe.olddrawField(scaleFactor);
-            */
 
         }
 
@@ -634,12 +640,7 @@ namespace Life
             
             tmr.Enabled = !tmr.Enabled;
             startStopBtn.BackColor = tmr.Enabled ? Color.LightGreen : Color.LightCoral;
-            
-
-            
-
-
-
+       
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
@@ -661,10 +662,11 @@ namespace Life
                 Glob.universe.bornNode(scaledX,scaledY);
             }
 
-            int width = pictureBox1.Width;
-            int height = pictureBox1.Height;
-            Graphics gr = pictureBox1.CreateGraphics();
-            Glob.universe.drawField(gr, width, height);
+            //int width = pictureBox1.Width;
+            //int height = pictureBox1.Height;
+            //Graphics gr = pictureBox1.CreateGraphics();
+            Glob.universe.drawField();
+            pictureBox1.Invalidate();
         }
 
         private void nudInterval_ValueChanged(object sender, EventArgs e)
@@ -676,6 +678,13 @@ namespace Life
         {
             if (Glob.universe == null) return;
             Glob.universe.movingNodes = cbMovingNodes.Checked;
+        }
+
+        private void pictureBox1_Paint(object sender, PaintEventArgs e)
+        {
+            if (Glob.universe!=null && Glob.universe.FieldScaledBitmap != null) 
+                e.Graphics.DrawImageUnscaled(Glob.universe.FieldScaledBitmap,0,0);
+
         }
     }
 

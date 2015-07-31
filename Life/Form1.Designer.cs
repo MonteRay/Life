@@ -30,6 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.cbMovingNodes = new System.Windows.Forms.CheckBox();
             this.lblInterval = new System.Windows.Forms.Label();
             this.lblFillFactor = new System.Windows.Forms.Label();
             this.lblScaleFactor = new System.Windows.Forms.Label();
@@ -40,7 +41,6 @@
             this.BtnGen = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.tmr = new System.Windows.Forms.Timer(this.components);
-            this.cbMovingNodes = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudInterval)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudFillFactor)).BeginInit();
@@ -64,6 +64,16 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(101, 247);
             this.panel1.TabIndex = 3;
+            // 
+            // cbMovingNodes
+            // 
+            this.cbMovingNodes.Location = new System.Drawing.Point(12, 218);
+            this.cbMovingNodes.Name = "cbMovingNodes";
+            this.cbMovingNodes.Size = new System.Drawing.Size(75, 24);
+            this.cbMovingNodes.TabIndex = 8;
+            this.cbMovingNodes.Text = "Moving";
+            this.cbMovingNodes.UseVisualStyleBackColor = true;
+            this.cbMovingNodes.CheckedChanged += new System.EventHandler(this.cbMovingNodes_CheckedChanged);
             // 
             // lblInterval
             // 
@@ -95,7 +105,7 @@
             // nudInterval
             // 
             this.nudInterval.Increment = new decimal(new int[] {
-            100,
+            50,
             0,
             0,
             0});
@@ -106,7 +116,7 @@
             0,
             0});
             this.nudInterval.Minimum = new decimal(new int[] {
-            100,
+            50,
             0,
             0,
             0});
@@ -139,6 +149,7 @@
             // 
             // nudScaleFactor
             // 
+            this.nudScaleFactor.Enabled = false;
             this.nudScaleFactor.Location = new System.Drawing.Point(12, 93);
             this.nudScaleFactor.Maximum = new decimal(new int[] {
             25,
@@ -154,7 +165,7 @@
             this.nudScaleFactor.Size = new System.Drawing.Size(75, 20);
             this.nudScaleFactor.TabIndex = 5;
             this.nudScaleFactor.Value = new decimal(new int[] {
-            25,
+            20,
             0,
             0,
             0});
@@ -190,21 +201,12 @@
             this.pictureBox1.TabIndex = 4;
             this.pictureBox1.TabStop = false;
             this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
+            this.pictureBox1.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox1_Paint);
             // 
             // tmr
             // 
             this.tmr.Interval = 1000;
             this.tmr.Tick += new System.EventHandler(this.timer1_Tick);
-            // 
-            // cbMovingNodes
-            // 
-            this.cbMovingNodes.Location = new System.Drawing.Point(12, 218);
-            this.cbMovingNodes.Name = "cbMovingNodes";
-            this.cbMovingNodes.Size = new System.Drawing.Size(75, 24);
-            this.cbMovingNodes.TabIndex = 8;
-            this.cbMovingNodes.Text = "Moving";
-            this.cbMovingNodes.UseVisualStyleBackColor = true;
-            this.cbMovingNodes.CheckedChanged += new System.EventHandler(this.cbMovingNodes_CheckedChanged);
             // 
             // Form1
             // 
