@@ -158,6 +158,13 @@ namespace Life
 
             public Bitmap FieldScaledBitmap;
 
+            public Task PrepareTask;
+            public Task NextGenTask;
+            public Task FieldDrawTask;
+
+            public CancellationTokenSource PrepareCancellationToken;
+
+
             public void preBornNode(int x, int y)
             {
                 int nodeId = _lastNodeId + 1 + bornList.Count;
@@ -262,6 +269,7 @@ namespace Life
                 nodes = new Dictionary<int, Node>();
                 bornList = new Dictionary<int, Node>();
                 killList=new List<int>();
+                PrepareCancellationToken=new CancellationTokenSource();
                 //FieldScaledBitmap = new Bitmap();
 
              }
@@ -409,6 +417,8 @@ namespace Life
             {
                 nextGenerationReady = false;
                 processing = true;
+                bornList.Clear();
+                killList.Clear();
                 int neighborCount;
                 int width = field.Width;
                 int height = field.Height;
@@ -608,15 +618,22 @@ namespace Life
         private async void timer1_Tick(object sender, EventArgs e)
         {
 
-            if (Glob.universe == null) return;
+            if (Glob.universe == null || (Glob.universe.NextGenTask!=null && Glob.universe.NextGenTask.Status==TaskStatus.Running)) return;
 
-            Glob.universe.prepareNextGeneration();
-            Glob.universe.nextGeneration();
-            Glob.universe.drawField();
-            pictureBox1.Invalidate();
+                Glob.universe.NextGenTask = new Task(
+                    () =>
+                    {
+                        if (Glob.universe.PrepareTask!=null) Glob.universe.PrepareTask.Wait();
+                        Glob.universe.nextGeneration();
+                        Glob.universe.drawField();
+                        pictureBox1.Invalidate();
+                        Glob.universe.PrepareTask = new Task(Glob.universe.prepareNextGeneration,Glob.universe.PrepareCancellationToken.Token);
+                        Glob.universe.PrepareTask.Start();
+                }
+                );
+            Glob.universe.NextGenTask.Start();
 
-
-
+        
             //int width = pictureBox1.Width;
             //int height = pictureBox1.Height;
 
@@ -667,6 +684,9 @@ namespace Life
             //Graphics gr = pictureBox1.CreateGraphics();
             Glob.universe.drawField();
             pictureBox1.Invalidate();
+            if (Glob.universe.PrepareTask!=null && Glob.universe.PrepareTask.Status==TaskStatus.Running) Glob.universe.PrepareCancellationToken.Cancel();
+            Glob.universe.PrepareTask = new Task(Glob.universe.prepareNextGeneration);
+            Glob.universe.PrepareTask.Start();
         }
 
         private void nudInterval_ValueChanged(object sender, EventArgs e)
